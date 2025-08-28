@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Standardliste</title>
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #000;
+      color: #00ff00;
+      cursor: url('https://upload.wikimedia.org/wikipedia/commons/4/4c/Green_arrow_cursor.png'), auto;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.normal-mode {
+      background-color: #fff;
+      color: #000;
+      cursor: auto;
+    }
+
+    h1 {
+      color: #00ff00;
+      text-shadow: 0 0 15px #00ff00, 0 0 30px #00ff00;
+      display: inline-block;
+      margin: 0;
+    }
+
+    body.normal-mode h1 {
+      color: #000;
+      text-shadow: none;
+    }
+
+    #topButtons {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 14px;
+      color: #00ff00;
+      background-color: #333;
+      border: 2px solid #00ff00;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+      min-height: 44px;
+    }
+
+    button:hover {
+      background-color: #00ff00;
+      color: #000;
+    }
+
+    button.mode-toggle {
+      background-color: #0044ff;
+      border-color: #0044ff;
+    }
+
+    button.rename-list {
+      background-color: #00ff00;
+      color: #000;
+    }
+
+    button.manage-lists {
+      background-color: #888800;
+      border-color: #888800;
+      color: #fff;
+    }
+
+    .input-container {
+      margin-bottom: 15px;
+      margin-top: 80px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      color: #00ff00;
+      background-color: #333;
+      border: 2px solid #00ff00;
+      width: 150px;
+    }
+
+    body.normal-mode input[type="text"] {
+      background-color: #fff;
+      color: #000;
+      border-color: #000;
+    }
+
+    ul#shoppingList {
+      margin-top: 20px;
+      list-style: none;
+      padding: 0;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    ul#shoppingList li {
+      padding: 8px 0;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    ul#shoppingList li:hover {
+      text-shadow: 0 0 15px #00ff00;
+    }
+
+    ul#shoppingList li.strikethrough {
+      text-decoration: line-through;
+      color: red;
+    }
+
+    .error-message {
+      background-color: #ff4d4d;
+      color: white;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 5px;
+      display: none;
+      position: relative;
+      font-size: 14px;
+    }
+
+    .error-message button {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 20px;
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      cursor: pointer;
+    }
+
+    /* Overlay für Listen-Verwaltung */
+    #listManagerOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.95);
+      color: #00ff00;
+      display: none;
+      z-index: 9999;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    #listManagerOverlay h2 {
+      margin-top: 0;
+    }
+
+    #listCollection {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    #listCollection li {
+      margin-bottom: 12px;
+      border: 1px solid #00ff00;
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #listCollection li input {
+      flex-grow: 1;
+      margin-right: 10px;
+      background: transparent;
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      font-size: 16px;
+      padding: 2px 4px;
+    }
+
+    .button-box {
+      display: flex;
+      gap: 5px;
+    }
+
+    #addListButton {
+      margin-top: 20px;
+      display: block;
+    }
+
+    @media (max-width: 600px) {
+      #topButtons {
+        flex-direction: column;
+        top: 10px;
+        right: 10px;
+      }
+
+      .input-container {
+        flex-direction: column;
+        align-items: stretch;
+        margin: 60px 10px 15px 10px;
+      }
+
+      .input-container input,
+      .input-container button {
+        width: 100%;
+      }
+
+      #listManagerOverlay {
+        padding: 10px;
+      }
+
+      #listCollection li {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .button-box {
+        margin-top: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="topButtons">
+    <button class="mode-toggle">Modus wechseln</button>
+    <button class="rename-list">Liste umbenennen</button>
+    <button class="manage-lists">Listen verwalten</button>
+  </div>
+
+  <h1 id="listTitle">Standardliste</h1>
+
+  <div class="input-container">
+    <input type="text" id="itemInput" placeholder="Neues Element" />
+    <button id="addButton">Hinzufügen</button>
+  </div>
+
+  <ul id="shoppingList"></ul>
+
+  <div class="error-message" id="errorMessage">
+    <span>Bitte gib einen Text ein!</span>
+    <button onclick="this.parentElement.style.display='none'">×</button>
+  </div>
+
+  <div id="listManagerOverlay">
+    <h2>Listen verwalten</h2>
+    <ul id="listCollection"></ul>
+    <button id="addListButton">Neue Liste hinzufügen</button>
+    <button onclick="document.getElementById('listManagerOverlay').style.display='none'">Schließen</button>
+  </div>
+
+  <script>
+    const modeToggle = document.querySelector('.mode-toggle');
+    const renameButton = document.querySelector('.rename-list');
+    const manageListsBtn = document.querySelector('.manage-lists');
+    const body = document.body;
+    const addButton = document.getElementById('addButton');
+    const itemInput = document.getElementById('itemInput');
+    const shoppingList = document.getElementById('shoppingList');
+    const errorMessage = document.getElementById('errorMessage');
+    const listTitle = document.getElementById('listTitle');
+    const overlay = document.getElementById('listManagerOverlay');
+    const listCollection = document.getElementById('listCollection');
+    const addListButton = document.getElementById('addListButton');
+
+    let lists = {
+      "Standardliste": []
+    };
+    let currentList = "Standardliste";
+
+    function renderList() {
+      shoppingList.innerHTML = '';
+      lists[currentList].forEach((item, index) => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        li.onclick = () => li.classList.toggle('strikethrough');
+        shoppingList.appendChild(li);
+      });
+      listTitle.textContent = currentList;
+    }
+
+    addButton.onclick = () => {
+      const value = itemInput.value.trim();
+      if (!value) {
+        errorMessage.style.display = 'block';
+        return;
+      }
+      errorMessage.style.display = 'none';
+      lists[currentList].push(value);
+      itemInput.value = '';
+      renderList();
+    };
+
+    itemInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addButton.click();
+    });
+
+    renameButton.onclick = () => {
+      const newName = prompt('Neuer Listenname:', currentList);
+      if (newName && newName.trim() !== '' && !lists[newName]) {
+        lists[newName] = lists[currentList];
+        delete lists[currentList];
+        currentList = newName;
+        renderList();
+      }
+    };
+
+    modeToggle.onclick = () => {
+      body.classList.toggle('normal-mode');
+      overlay.classList.toggle('normal-mode');
+    };
+
+    manageListsBtn.onclick = () => {
+      listCollection.innerHTML = '';
+      for (let name in lists) {
+        const li = document.createElement('li');
+        const nameInput = document.createElement('input');
+        nameInput.value = name;
+        nameInput.onchange = () => {
+          const newName = nameInput.value.trim();
+          if (newName && !lists[newName]) {
+            lists[newName] = lists[name];
+            delete lists[name];
+            if (currentList === name) currentList = newName;
+            renderList();
+            updateOverlay();
+          }
+        };
+
+        const openBtn = document.createElement('button');
+        openBtn.textContent = 'Öffnen';
+        openBtn.onclick = () => {
+          currentList = name;
+          overlay.style.display = 'none';
+          renderList();
+        };
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Löschen';
+        deleteBtn.onclick = () => {
+          if (confirm(`Liste "${name}" löschen?`)) {
+            delete lists[name];
+            if (currentList === name) currentList = Object.keys(lists)[0] || 'Standardliste';
+            renderList();
+            updateOverlay();
+          }
+        };
+
+        const box = document.createElement('div');
+        box.className = 'button-box';
+        box.appendChild(openBtn);
+        box.appendChild(deleteBtn);
+
+        li.appendChild(nameInput);
+        li.appendChild(box);
+        listCollection.appendChild(li);
+      }
+      overlay.style.display = 'block';
+    };
+
+    addListButton.onclick = () => {
+      const newName = prompt('Name der neuen Liste:');
+      if (newName && !lists[newName]) {
+        lists[newName] = [];
+        updateOverlay();
+      }
+    };
+
+    function updateOverlay() {
+      overlay.style.display = 'none';
+      manageListsBtn.click();
+    }
+
+    renderList();
+  </script>
+</body>
+</html>
